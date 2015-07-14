@@ -33,13 +33,29 @@
 	});
 	
 	myApp.controller('userController', function($scope, $http) {
+		$scope.userdata = [];
 		$scope.page = 0;
+		$scope.pages = 0;
+		
+		$scope.allowChangePage = function(page) {
+			return page>=0 && page<=$scope.pages;
+		};
+		$scope.setPage = function(num) {
+		if (allowChangePage(num))
+			$scope.page = num;
+		};
+		$scope.countPages = function () {
+			$scope.pages = Math.ceil($scope.userdata.length/$scope.onpage);
+			//if ($scope.userdata.length>$scope.pages*$scope.onpage) $scope.pages = $scope.pages + 1;
+		};
 		$scope.onpages = [3,13,24];
 		$scope.onpage = $scope.onpages[0];
-		$scope.setOnpage = function(neu) {
-			$scope.onpage = neu;
+		$scope.setOnpage = function(num) {
+			$scope.onpage = num;
+			$scope.countPages();
 			$scope.page = 0;
 		};
+		
 		$scope.printDate= function (timestamp) {
 			var temp = new Date( Number(timestamp*1000)); 
 			return temp.toDateString();
@@ -51,11 +67,13 @@
 				url: 'http://api.randomuser.me/?results=' + n
 			}).success(function(data, status) {
 				$scope.userdata = data.results;
+				$scope.countPages();
 			}).error(function(data, status) {
 				
 			});
 		};
 		$scope.load(63);
+		//$scope.setOnpage($scope.onpages[0]); //set num of pages
 	});
 	</script>
   </head>
@@ -72,6 +90,15 @@
       </div>
     </div>
     <div class="container" >
+	<div class="text-center">
+		<nav>
+			<ul class="pagination">
+				<li class="{{allowChangePage(page - 1)?'enabled':'disabled'}}" ng-click="setPage(page - 1)"><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
+				<li ng-repeat="i in [] | range:pages" class="{{page == $index ? 'active' : ''}}" ng-click = "page = $index"><a href="#">{{$index + 1 }}<span class="sr-only">(current)</span></a></li>
+				<li class="{{allowChangePage(page + 1)?'enabled':'disabled'}}" ng-click="setPage(page + 1)"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>
+			</ul>
+		</nav>
+		</div>
        <table class="table table-striped">
 	   <thead>
 		<tr>
@@ -82,7 +109,7 @@
 		<th>Дата рождения <button type="button" class="btn btn-warning" ng-show = "page+onpage<userdata.length" ng-click="page= page+ onpage">></button></th>
 		</tr>
 		</thead>
-		<tr ng-repeat="userd in userdata" ng-if="$index >= page && $index < page + onpage">
+		<tr ng-repeat="userd in userdata" ng-if="$index >= page*onpage && $index < (page + 1)* onpage">
 		<td><img src="{{userd.user.picture.thumbnail}}" alt = "{{userd.user.username}}"/></td>
 		<td>{{userd.user.name.last + ' ' + userd.user.name.first}}</td>
 		<td>{{userd.user.email}}</td>
