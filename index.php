@@ -45,6 +45,7 @@
 			$scope.page = num;
 		};
 		$scope.countPages = function () {
+			if ($scope.userdata.length == 0 ) $scope.pages = 0; else
 			$scope.pages = Math.ceil($scope.userdata.length/$scope.onpage);
 			//if ($scope.userdata.length>$scope.pages*$scope.onpage) $scope.pages = $scope.pages + 1;
 		};
@@ -70,9 +71,14 @@
 				$scope.userdata = data.results;
 				$scope.countPages();
 			}).error(function(data, status) {
-				
+				$scope.userdata = [];
+				$scope.countPages();
 			});
-			$scope.countPages();
+			else 
+			{
+				$scope.userdata = [];
+				$scope.countPages();
+			}	
 		};
 		$scope.load(63);
 		//$scope.setOnpage($scope.onpages[0]); //set num of pages
@@ -119,7 +125,7 @@
 		<td>{{printDate(userd.user.registered)}}</td>
 		</tr>
 	 </table>
-
+		<span ng-show = "pages==0">Sorry, nobody</span>
       <hr>
 
     </div> <!-- /container -->
