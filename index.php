@@ -48,7 +48,7 @@
 			$scope.pages = Math.ceil($scope.userdata.length/$scope.onpage);
 			//if ($scope.userdata.length>$scope.pages*$scope.onpage) $scope.pages = $scope.pages + 1;
 		};
-		$scope.onpages = [3,13,24];
+		$scope.onpages = [5,13,25];
 		$scope.onpage = $scope.onpages[0];
 		$scope.setOnpage = function(num) {
 			$scope.onpage = num;
@@ -102,11 +102,11 @@
        <table class="table table-striped">
 	   <thead>
 		<tr>
-		<th><button type="button" class="btn btn-warning" ng-show ="page>0" ng-click="page = page - onpage"><</button></th>
+		<th><!--button type="button" class="btn btn-warning" ng-show ="allowChangePage(page-1)" ng-click="setPage(page-1)"><</button--></th>
 		<th>Фамилия Имя</th>
 		<th>Email</th>
 		<th>Username</th>
-		<th>Дата рождения <button type="button" class="btn btn-warning" ng-show = "page+onpage<userdata.length" ng-click="page= page+ onpage">></button></th>
+		<th>Дата рождения <!--button type="button" class="btn btn-warning" ng-show ="allowChangePage(page+1)" ng-click="setPage(page+1)">></button--></th>
 		</tr>
 		</thead>
 		<tr ng-repeat="userd in userdata" ng-if="$index >= page*onpage && $index < (page + 1)* onpage">
