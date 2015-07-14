@@ -62,6 +62,7 @@
 		}
 		$scope.load = function(n) {
 		if (!isNaN(n))
+			if (n>=0)
 			$http({
 				responseType : 'json',
 				url: 'http://api.randomuser.me/?results=' + n
