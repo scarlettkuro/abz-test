@@ -34,7 +34,12 @@
 	
 	myApp.controller('userController', function($scope, $http) {
 		$scope.page = 0;
-		$scope.onpage = 12;
+		$scope.onpages = [3,13,24];
+		$scope.onpage = $scope.onpages[0];
+		$scope.setOnpage = function(neu) {
+			$scope.onpage = neu;
+			$scope.page = 0;
+		};
 		$scope.printDate= function (timestamp) {
 			var temp = new Date( Number(timestamp*1000)); 
 			return temp.toDateString();
@@ -94,9 +99,7 @@
       <div class="container">
         <a class="navbar-brand" >{{userdata.length}} users</a>
 		<div class="btn-group navbar-text" role="group">
-		  <button type="button" ng-click="onpage=4" class="btn {{onpage==4?'btn-primary':'btn-default'}}">4</button>
-		  <button type="button" ng-click="onpage=12" class="btn {{onpage==12?'btn-primary':'btn-default'}}">12</button>
-		  <button type="button" ng-click="onpage=25" class="btn {{onpage==25?'btn-primary':'btn-default'}}">25</button>
+		  <button type="button" ng-repeat="num in onpages" ng-click="setOnpage(num)" class="btn {{onpage==num?'btn-primary':'btn-default'}}">{{num}}</button>
 		</div>
 		<p class="navbar-text ">Do you wanna another number of users?</p>
 		<form class="navbar-form navbar-left" role="search">
