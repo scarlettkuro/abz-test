@@ -53,22 +53,38 @@
 	
 	function UserData(_userdata) {
 		this.data = _userdata; //array
+		//console.log(this.data['user']);
 		this.length = function() {
-			return data.length;
+			return this.data.length;
 		}
-		this.sort = function(param) {
-			this.data.sort(this.makeComparator(param));
-			//alert('fuck you');
-		};
+		
 		this.sorted = '';
 		this.sortReverse = 1;
+		
+		this.sort = function(param) {
+			if (param==this.sorted)
+				this.sortReverse = - this.sortReverse;
+				else this.sortReverse = 1;
+			this.sorted = param;
+			var comparator;
+			if(typeof this['sort-'+param] === 'function')
+				comparator = this['sort-'+param]();
+			else
+				comparator = this.makeComparator(param);
+			this.data.sort(comparator);
+		};
+		
+		this['sort-name'] = function() {
+			var reverse = this.sortReverse;
+			return function(a,b) {
+				var _a = a.user.name.last + a.user.name.first;
+				var _b = b.user.name.last + b.user.name.first;
+				return reverse*_a.localeCompare(_b);
+			};
+		};
+				
 		this.makeComparator = function(param) {
 			var reverse = this.sortReverse;
-			if (param==this.sorted)
-				reverse = - reverse;
-				else reverse = 1;
-			this.sorted = param;
-			this.sortReverse = reverse;
 			return function(a,b) {
 				if (isNaN(a.user[param]) || isNaN(b.user[param])) 
 					return reverse*a.user[param].localeCompare(b.user[param]);
@@ -153,7 +169,7 @@
 	   <thead>
 		<tr>
 		<th><!--button type="button" class="btn btn-warning" ng-show ="allowSetPage(page-1)" ng-click="setPage(page-1)"><</button--></th>
-		<th><a class="navbar-brand" ">Фамилия Имя</a></th>
+		<th><a class="navbar-brand" ng-click="userdata.sort('name')">Фамилия Имя</a></th>
 		<th><a class="navbar-brand"  ng-click="userdata.sort('email')">Email</a></th>
 		<th><a class="navbar-brand"  ng-click="userdata.sort('username')">Username</a></th>
 		<th><a class="navbar-brand"  ng-click="userdata.sort('registered')">Дата регистрации</a> <!--button type="button" class="btn btn-warning" ng-show ="allowSetPage(page+1)" ng-click="setPage(page+1)">></button--></th>
