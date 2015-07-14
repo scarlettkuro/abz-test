@@ -41,16 +41,46 @@
 		this.setOnpage = function(num) {
 			this.onpage = num;
 			this.countPages();
-			//this.page = 0;
 		};
 		
 		this.countPages = function () {
 			if (this.elements == 0 ) this.pages = 0; else
 			this.pages = Math.ceil(this.elements/this.onpage);
 			this.page = 0;
-			//if ($scope.userdata.length>$scope.pages*$scope.onpage) $scope.pages = $scope.pages + 1;
 		};
 		
+	}
+	
+	function UserData(_userdata) {
+		this.data = _userdata; //array
+		this.length = function() {
+			return data.length;
+		}
+		this.sort = function(param) {
+			this.data.sort(this.makeComparator(param));
+			//alert('fuck you');
+		};
+		this.sorted = '';
+		this.sortReverse = 1;
+		this.makeComparator = function(param) {
+			var reverse = this.sortReverse;
+			if (param==this.sorted)
+				reverse = - reverse;
+				else reverse = 1;
+			this.sorted = param;
+			this.sortReverse = reverse;
+			return function(a,b) {
+				if (isNaN(a.user[param]) || isNaN(b.user[param])) 
+					return reverse*a.user[param].localeCompare(b.user[param]);
+				else return reverse*(a.user[param] - b.user[param]);
+				
+			}
+		};
+			
+		//this.reverse = -1;
+		this['username'] = function(a, b) {
+		   return a.user.username.localeCompare(b.user.username);
+		};
 	}
 	
 	myApp.filter('range', function() {
@@ -63,7 +93,7 @@
 	});
 	
 	myApp.controller('userController', function($scope, $http) {
-		$scope.userdata = [];
+		$scope.userdata = {};
 		$scope.onpages = [5,13,25];
 		$scope.paginator = new Paginator();
 		$scope.paginator.setOnpage($scope.onpages[0]);
@@ -80,16 +110,16 @@
 				responseType : 'json',
 				url: 'http://api.randomuser.me/?results=' + n
 			}).success(function(data, status) {
-				$scope.userdata = data.results;
-				$scope.paginator.setElementsCount($scope.userdata.length);
+				$scope.userdata = new UserData(data.results);
+				$scope.paginator.setElementsCount($scope.userdata.length());
 			}).error(function(data, status) {
-				$scope.userdata = [];
-				$scope.paginator.setElementsCount($scope.userdata.length);
+				$scope.userdata = new UserData([]);
+				$scope.paginator.setElementsCount($scope.userdata.length());
 			});
 			else 
 			{
-				$scope.userdata = [];
-				$scope.paginator.setElementsCount($scope.userdata.length);
+				$scope.userdata = new UserData([]);
+				$scope.paginator.setElementsCount($scope.userdata.length());
 			}	
 		};
 		$scope.load(63);
@@ -123,13 +153,13 @@
 	   <thead>
 		<tr>
 		<th><!--button type="button" class="btn btn-warning" ng-show ="allowSetPage(page-1)" ng-click="setPage(page-1)"><</button--></th>
-		<th>Фамилия Имя</th>
-		<th>Email</th>
-		<th>Username</th>
-		<th>Дата рождения <!--button type="button" class="btn btn-warning" ng-show ="allowSetPage(page+1)" ng-click="setPage(page+1)">></button--></th>
+		<th><a class="navbar-brand" ">Фамилия Имя</a></th>
+		<th><a class="navbar-brand"  ng-click="userdata.sort('email')">Email</a></th>
+		<th><a class="navbar-brand"  ng-click="userdata.sort('username')">Username</a></th>
+		<th><a class="navbar-brand"  ng-click="userdata.sort('registered')">Дата регистрации</a> <!--button type="button" class="btn btn-warning" ng-show ="allowSetPage(page+1)" ng-click="setPage(page+1)">></button--></th>
 		</tr>
 		</thead>
-		<tr ng-repeat="userd in userdata" ng-if="$index >= paginator.page*paginator.onpage && $index < (paginator.page + 1)* paginator.onpage">
+		<tr ng-repeat="userd in userdata.data" ng-if="$index >= paginator.page*paginator.onpage && $index < (paginator.page + 1)* paginator.onpage">
 		<td><img src="{{userd.user.picture.thumbnail}}" alt = "{{userd.user.username}}"/></td>
 		<td>{{userd.user.name.last + ' ' + userd.user.name.first}}</td>
 		<td>{{userd.user.email}}</td>
@@ -144,7 +174,7 @@
 	<br>
    	<footer class="navbar navbar-default navbar-fixed-bottom">
       <div class="container">
-        <a class="navbar-brand" >{{userdata.length}} users</a>
+        <a class="navbar-brand" >{{userdata.length()}} users</a>
 		<div class="btn-group navbar-text" role="group">
 		  <button type="button" ng-repeat="num in onpages" ng-click="paginator.setOnpage(num)" class="btn {{paginator.onpage==num?'btn-primary':'btn-default'}}">{{num}}</button>
 		</div>
