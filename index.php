@@ -72,6 +72,7 @@
 			}).error(function(data, status) {
 				
 			});
+			$scope.countPages();
 		};
 		$scope.load(63);
 		//$scope.setOnpage($scope.onpages[0]); //set num of pages
