@@ -38,10 +38,10 @@
 		$scope.pages = 0;
 		
 		$scope.allowChangePage = function(page) {
-			return page>=0 && page<=$scope.pages;
+			return page>=0 && page<$scope.pages;
 		};
 		$scope.setPage = function(num) {
-		if (allowChangePage(num))
+		if ($scope.allowChangePage(num))
 			$scope.page = num;
 		};
 		$scope.countPages = function () {
@@ -94,7 +94,7 @@
 		<nav>
 			<ul class="pagination">
 				<li class="{{allowChangePage(page - 1)?'enabled':'disabled'}}" ng-click="setPage(page - 1)"><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
-				<li ng-repeat="i in [] | range:pages" class="{{page == $index ? 'active' : ''}}" ng-click = "page = $index"><a href="#">{{$index + 1 }}<span class="sr-only">(current)</span></a></li>
+				<li ng-repeat="i in [] | range:pages" class="{{page == $index ? 'active' : ''}}" ng-click = "setPage($index)"><a href="#" >{{$index + 1 }}<span class="sr-only">(current)</span></a></li>
 				<li class="{{allowChangePage(page + 1)?'enabled':'disabled'}}" ng-click="setPage(page + 1)"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>
 			</ul>
 		</nav>
