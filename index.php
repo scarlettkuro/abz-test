@@ -34,12 +34,13 @@
 	
 	myApp.controller('userController', function($scope, $http) {
 		$scope.page = 0;
-		$scope.onpage = 10;
+		$scope.onpage = 12;
 		$scope.printDate= function (timestamp) {
 			var temp = new Date( Number(timestamp*1000)); 
 			return temp.toDateString();
 		}
 		$scope.load = function(n) {
+		if (!isNaN(n))
 			$http({
 				responseType : 'json',
 				url: 'http://api.randomuser.me/?results=' + n
@@ -92,14 +93,19 @@
    	<footer class="navbar navbar-default navbar-fixed-bottom">
       <div class="container">
         <a class="navbar-brand" >{{userdata.length}} users</a>
+		<div class="btn-group navbar-text" role="group">
+		  <button type="button" ng-click="onpage=4" class="btn {{onpage==4?'btn-primary':'btn-default'}}">4</button>
+		  <button type="button" ng-click="onpage=12" class="btn {{onpage==12?'btn-primary':'btn-default'}}">12</button>
+		  <button type="button" ng-click="onpage=25" class="btn {{onpage==25?'btn-primary':'btn-default'}}">25</button>
+		</div>
 		<p class="navbar-text ">Do you wanna another number of users?</p>
-		
 		<form class="navbar-form navbar-left" role="search">
 			<div class="form-group">
 				<input type="text" class="form-control" ng-model="usercount" placeholder="Enter number here">
 			</div>
 			<button type="submit" class="btn btn-default" ng-click="load(usercount)">Try</button>
 		</form>
+		
       </div>
     </footer>
     <!-- Placed at the end of the document so the pages load faster -->
