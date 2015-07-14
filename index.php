@@ -22,6 +22,36 @@
 	
 	//var yete;
 	var myApp = angular.module('myApp',[]);
+	function Paginator() {
+		this.page = 0;
+		this.pages = 0;
+		this.elements = 0;
+		this.setElementsCount = function(indexes) {
+			this.elements = indexes;
+			this.countPages();
+		};
+		this.allowSetPage = function(_page) {
+			return _page>=0 && _page<this.pages;
+		};
+		this.setPage = function(num) {
+			if (this.allowSetPage(num))
+				this.page = num;
+		};
+		this.onpage = 0;
+		this.setOnpage = function(num) {
+			this.onpage = num;
+			this.countPages();
+			//this.page = 0;
+		};
+		
+		this.countPages = function () {
+			if (this.elements == 0 ) this.pages = 0; else
+			this.pages = Math.ceil(this.elements/this.onpage);
+			this.page = 0;
+			//if ($scope.userdata.length>$scope.pages*$scope.onpage) $scope.pages = $scope.pages + 1;
+		};
+		
+	}
 	
 	myApp.filter('range', function() {
 	  return function(val, range) {
@@ -34,33 +64,15 @@
 	
 	myApp.controller('userController', function($scope, $http) {
 		$scope.userdata = [];
-		$scope.page = 0;
-		$scope.pages = 0;
-		
-		$scope.allowChangePage = function(page) {
-			return page>=0 && page<$scope.pages;
-		};
-		$scope.setPage = function(num) {
-		if ($scope.allowChangePage(num))
-			$scope.page = num;
-		};
-		$scope.countPages = function () {
-			if ($scope.userdata.length == 0 ) $scope.pages = 0; else
-			$scope.pages = Math.ceil($scope.userdata.length/$scope.onpage);
-			//if ($scope.userdata.length>$scope.pages*$scope.onpage) $scope.pages = $scope.pages + 1;
-		};
 		$scope.onpages = [5,13,25];
-		$scope.onpage = $scope.onpages[0];
-		$scope.setOnpage = function(num) {
-			$scope.onpage = num;
-			$scope.countPages();
-			$scope.page = 0;
-		};
+		$scope.paginator = new Paginator();
+		$scope.paginator.setOnpage($scope.onpages[0]);
 		
 		$scope.printDate= function (timestamp) {
 			var temp = new Date( Number(timestamp*1000)); 
 			return temp.toDateString();
 		}
+		
 		$scope.load = function(n) {
 		if (!isNaN(n))
 			if (n>=0)
@@ -69,15 +81,15 @@
 				url: 'http://api.randomuser.me/?results=' + n
 			}).success(function(data, status) {
 				$scope.userdata = data.results;
-				$scope.countPages();
+				$scope.paginator.setElementsCount($scope.userdata.length);
 			}).error(function(data, status) {
 				$scope.userdata = [];
-				$scope.countPages();
+				$scope.paginator.setElementsCount($scope.userdata.length);
 			});
 			else 
 			{
 				$scope.userdata = [];
-				$scope.countPages();
+				$scope.paginator.setElementsCount($scope.userdata.length);
 			}	
 		};
 		$scope.load(63);
@@ -101,23 +113,23 @@
 	<div class="text-center">
 		<nav>
 			<ul class="pagination">
-				<li class="{{allowChangePage(page - 1)?'enabled':'disabled'}}" ng-click="setPage(page - 1)"><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
-				<li ng-repeat="i in [] | range:pages" class="{{page == $index ? 'active' : ''}}" ng-click = "setPage($index)"><a href="#" >{{$index + 1 }}<span class="sr-only">(current)</span></a></li>
-				<li class="{{allowChangePage(page + 1)?'enabled':'disabled'}}" ng-click="setPage(page + 1)"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>
+				<li class="{{paginator.allowSetPage(paginator.page - 1)?'enabled':'disabled'}}" ng-click="paginator.setPage(paginator.page - 1)"><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
+				<li ng-repeat="i in [] | range:(paginator.pages)" class="{{paginator.page == $index ? 'active' : ''}}" ng-click = "paginator.setPage($index)"><a href="#" >{{$index + 1 }}<span class="sr-only">(current)</span></a></li>
+				<li class="{{paginator.allowSetPage(paginator.page + 1)?'enabled':'disabled'}}" ng-click="paginator.setPage(paginator.page + 1)"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>
 			</ul>
 		</nav>
 		</div>
        <table class="table table-striped">
 	   <thead>
 		<tr>
-		<th><!--button type="button" class="btn btn-warning" ng-show ="allowChangePage(page-1)" ng-click="setPage(page-1)"><</button--></th>
+		<th><!--button type="button" class="btn btn-warning" ng-show ="allowSetPage(page-1)" ng-click="setPage(page-1)"><</button--></th>
 		<th>Фамилия Имя</th>
 		<th>Email</th>
 		<th>Username</th>
-		<th>Дата рождения <!--button type="button" class="btn btn-warning" ng-show ="allowChangePage(page+1)" ng-click="setPage(page+1)">></button--></th>
+		<th>Дата рождения <!--button type="button" class="btn btn-warning" ng-show ="allowSetPage(page+1)" ng-click="setPage(page+1)">></button--></th>
 		</tr>
 		</thead>
-		<tr ng-repeat="userd in userdata" ng-if="$index >= page*onpage && $index < (page + 1)* onpage">
+		<tr ng-repeat="userd in userdata" ng-if="$index >= paginator.page*paginator.onpage && $index < (paginator.page + 1)* paginator.onpage">
 		<td><img src="{{userd.user.picture.thumbnail}}" alt = "{{userd.user.username}}"/></td>
 		<td>{{userd.user.name.last + ' ' + userd.user.name.first}}</td>
 		<td>{{userd.user.email}}</td>
@@ -125,7 +137,7 @@
 		<td>{{printDate(userd.user.registered)}}</td>
 		</tr>
 	 </table>
-		<span ng-show = "pages==0">Sorry, nobody</span>
+		<span ng-show = "paginator.pages==0">Sorry, nobody</span>
       <hr>
 
     </div> <!-- /container -->
@@ -134,7 +146,7 @@
       <div class="container">
         <a class="navbar-brand" >{{userdata.length}} users</a>
 		<div class="btn-group navbar-text" role="group">
-		  <button type="button" ng-repeat="num in onpages" ng-click="setOnpage(num)" class="btn {{onpage==num?'btn-primary':'btn-default'}}">{{num}}</button>
+		  <button type="button" ng-repeat="num in onpages" ng-click="paginator.setOnpage(num)" class="btn {{paginator.onpage==num?'btn-primary':'btn-default'}}">{{num}}</button>
 		</div>
 		<p class="navbar-text ">Do you wanna another number of users?</p>
 		<form class="navbar-form navbar-left" role="search">
